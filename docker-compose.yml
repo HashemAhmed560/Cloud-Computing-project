@@ -1,0 +1,28 @@
+version: '3'
+services:
+  database: 
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=php_docker
+      - MYSQL_USER=php_docker
+      - MYSQL_PASSWORD=password # password to view the db
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1 
+    volumes:
+      - "./sql_file:/docker-entrypoint-initdb.d" # this is how we persist a SQL db even when the container stops
+
+  website:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    volumes:
+      - "./:/var/www/html" # sync the current dir on the local machine to the dir of the container
+    ports:
+      - "80:80" # map port 80 of container to port 80 of host for web server
+
+  phpmyadmin: #phpmy admin is used to only view the database
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8001:80" # map port 8001 of host to port 80 of container for phpMyAdmin
+    environment:
+      - PMA_HOST=database
+      - PMA_PORT=3306
